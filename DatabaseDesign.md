@@ -148,6 +148,14 @@ CREATE TABLE orders (
 
 Reduces the number of rows scanned in each query by only accessing relevant partitions. This is beneficial for queries filtering by order_date, improving overall query response time.
 
-### Query Plan Analysis
+### Performance Discussion
+
+**Original Query:** Scans all rows in the table, resulting in high execution time for large datasets.
+
+**Full-Text Index:** Reduces rows scanned and improves search performance significantly.
+
+**Denormalization:** Improves performance but is less efficient than full-text indexing for wildcard searches.
+
+**Partitioning:** Speeds up historical queries by reducing the scanned dataset to relevant partitions.
 
 
