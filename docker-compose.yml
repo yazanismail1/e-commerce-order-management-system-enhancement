@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # RabbitMQ port
+      - "15672:15672" # RabbitMQ management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    restart: always
+
+  node_server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: node_server
+    ports:
+      - "3030:3030"
+    environment:
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    working_dir: /app
+    command: ["npx", "nodemon", "index.js"] 
+    depends_on:
+      - rabbitmq
+    restart: always
+
+  amqp_consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: amqp_consumer
+    environment:
+      RABBITMQ_URL: "amqp://rabbitmq"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    working_dir: /app
+    command: ["node", "consumers/amqpConsumer.js"] 
+    depends_on:
+      - rabbitmq
+    restart: always
+
+networks:
+  default:
+    name: sayara_network
